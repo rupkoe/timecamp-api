@@ -17,12 +17,12 @@ func httpGet(url string) ([]byte, error) {
 
 	response, err := http.Get(url)
 	if err != nil {
-		return data, err
+		return nil, err
 	}
 
 	data, err = ioutil.ReadAll(response.Body)
 	if err != nil {
-		return data, err
+		return nil, err
 	}
 
 	return data, nil
