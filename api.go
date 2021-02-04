@@ -1,4 +1,3 @@
-// Package tc-api contains api types and helper functions on these types (like filtering).
 package api
 
 import (
