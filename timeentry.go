@@ -53,6 +53,10 @@ func (e TimeEntry) HasDescription() bool {
 	return len(strings.Trim(e.Description, " ")) > 0
 }
 
+func (e TimeEntry) IsBillable() bool {
+	return e.Billable > 0
+}
+
 // TimeEntryParams query parameters.
 type TimeEntryParams struct {
 	From  time.Time
