@@ -41,7 +41,7 @@ func (e TimeEntry) DurationParsed() (time.Duration, error) {
 	return dur, nil
 }
 
-func (e TimeEntry) DateFormatted() time.Time {
+func (e TimeEntry) DateParsed() time.Time {
 	date, err := time.Parse(DateFormat, e.Date)
 	if err != nil {
 		log.Fatal("could not parse entry date:", e.Date)
