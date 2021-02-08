@@ -52,17 +52,21 @@ func GetProjectTree(tasks []api.Task) ([]ProjectNode, error) {
 // https://stackoverflow.com/questions/22957638/make-a-tree-from-a-table-using-golang
 
 func PrintProjectTree(tasks []api.Task, project api.Task) {
-	printTree(tasks, project, 1)
+	TraverseTree(tasks, project, printit)
 }
 
-func printTree(tasks []api.Task, parent api.Task, depth int) {
+func printit(task api.Task) {
+	for i := 1; i < task.LevelParsed(); i++ {
+		fmt.Print("--")
+	}
+	fmt.Println(task.Level, task.Name)
+}
+
+func TraverseTree(tasks []api.Task, parent api.Task, callback func(api.Task)) {
 	for _, task := range tasks {
 		if task.ParentID == parent.TaskID {
-			for i := 1; i <= depth; i++ {
-				fmt.Print("--")
-			}
-			fmt.Println(task.Name)
-			printTree(tasks, task, depth+1)
+			callback(task)
+			TraverseTree(tasks, task, callback)
 		}
 	}
 }
