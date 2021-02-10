@@ -86,10 +86,9 @@ func SummarizeTaskTree(tasks []api.Task, entries []api.TimeEntry, root api.Task)
 		var taskTimes Totals
 		for _, timeEntry := range timeEntries {
 			duration, _ := timeEntry.DurationParsed()
+			taskTimes.TotalTime += duration
 			if timeEntry.IsBillable() {
 				taskTimes.BillableTime += duration
-			} else {
-				taskTimes.TotalTime += duration
 			}
 		}
 		taskTotals.add(task.TaskID, taskTimes)
