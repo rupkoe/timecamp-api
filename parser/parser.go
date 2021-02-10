@@ -31,9 +31,14 @@ func (t TaskTotals) add(taskId string, totals Totals) {
 	}
 }
 
-// get returns the totals for task
-func (t TaskTotals) get(taskId string) Totals {
-	return t[taskId]
+// Get returns the totals for task
+func (t TaskTotals) Get(taskId string) Totals {
+	totals, ok := t[taskId]
+	if ok {
+		return totals
+	} else {
+		return Totals{0, 0}
+	}
 }
 
 // GetProjectList return an array of projects - in TimeCamp, projects are simply tasks at the top level.
