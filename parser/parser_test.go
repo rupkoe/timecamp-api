@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+// todo: use data from rupert's fixture file
+
 func TestGetProjectList(t *testing.T) {
 	type args struct {
 		tasks []api.Task
@@ -58,7 +60,7 @@ func Test_TraverseTree(t *testing.T) {
 	type args struct {
 		tasks    []api.Task
 		parent   api.Task
-		callback func(api.Task)
+		callback func(api.Task, map[int]string)
 	}
 	tests := []struct {
 		name string
@@ -98,7 +100,8 @@ func Test_TraverseTree(t *testing.T) {
 					ParentID: "0",
 					Level:    "1",
 				},
-				func(task api.Task) {
+				func(task api.Task, parentIds map[int]string) {
+					// todo: check for parentIds here as well?
 					ok := task.TaskID == "A-B" || task.TaskID == "A-B-C"
 					if !ok {
 						t.Errorf("invalid (sub-)task %v", task.TaskID)
@@ -109,7 +112,7 @@ func Test_TraverseTree(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			TraverseTree(tt.args.tasks, tt.args.parent, tt.args.callback)
+			traverseTree(tt.args.tasks, tt.args.parent, tt.args.callback)
 		})
 	}
 }
