@@ -52,7 +52,7 @@ func GetProjectList(tasks []api.Task) []api.Task {
 	return result
 }
 
-// GetTaskById returns a taks identified by its ID.
+// GetTaskById returns a task identified by its ID.
 func GetTaskById(tasks []api.Task, id string) (*api.Task, error) {
 	for _, task := range tasks {
 		if task.TaskID == id {
