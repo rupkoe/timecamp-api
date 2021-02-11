@@ -58,16 +58,17 @@ func TestGetProjectList(t *testing.T) {
 
 func Test_TraverseTree(t *testing.T) {
 	type args struct {
-		tasks    []api.Task
-		parent   api.Task
-		callback func(api.Task, map[int]string)
+		tasks         []api.Task
+		parent        api.Task
+		includeParent bool
+		expectedIDs   []string
 	}
 	tests := []struct {
 		name string
 		args args
 	}{
 		{
-			name: "Minimal Test",
+			name: "With parent task",
 			args: args{
 				[]api.Task{
 					{
@@ -100,19 +101,68 @@ func Test_TraverseTree(t *testing.T) {
 					ParentID: "0",
 					Level:    "1",
 				},
-				func(task api.Task, parentIds map[int]string) {
-					// todo: check for parentIds here as well?
-					ok := task.TaskID == "A-B" || task.TaskID == "A-B-C"
-					if !ok {
-						t.Errorf("invalid (sub-)task %v", task.TaskID)
-					}
+				false,
+				[]string{"A-B", "A-B-C"},
+			},
+		}, {
+			name: "Without parent task",
+			args: args{
+				[]api.Task{
+					{
+						Name:     "Task A",
+						TaskID:   "A",
+						ParentID: "0",
+						Level:    "1",
+					},
+					{
+						Name:     "Task A-B",
+						TaskID:   "A-B",
+						ParentID: "A",
+						Level:    "2",
+					},
+					{
+						Name:     "Task A-B-C",
+						TaskID:   "A-B-C",
+						ParentID: "A-B",
+						Level:    "3",
+					},
+					{
+						Name:     "Task C",
+						TaskID:   "C",
+						ParentID: "0",
+						Level:    "1",
+					}},
+				api.Task{
+					Name:     "Task A",
+					TaskID:   "A",
+					ParentID: "0",
+					Level:    "1",
 				},
+				true,
+				[]string{"A", "A-B", "A-B-C"},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			traverseTree(tt.args.tasks, tt.args.parent, tt.args.callback)
+			taskIds := map[string]struct{}{}
+			traverseTree(tt.args.tasks, tt.args.parent, tt.args.includeParent, func(task api.Task, m map[int]string) {
+				_, exists := taskIds[task.TaskID]
+				if !exists {
+					taskIds[task.TaskID] = struct{}{}
+				} else {
+					t.Errorf("Each TaskID should only show up once, but found %s more often", task.TaskID)
+				}
+			})
+			for _, expected := range tt.args.expectedIDs {
+				if _, exists := taskIds[expected]; !exists {
+					t.Errorf("Expected task %s was not returned", expected)
+				}
+			}
+			if len(tt.args.expectedIDs) != len(taskIds) {
+				t.Errorf("Number of returned task IDs (%d) is not equal number of exptected task IDs (%d)",
+					len(taskIds), len(tt.args.expectedIDs))
+			}
 		})
 	}
 }
