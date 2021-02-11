@@ -1,5 +1,7 @@
 # Go TimeCamp API Client
 
+![Go](https://github.com/rupkoe/timecamp-api/workflows/Go/badge.svg)
+
 A partial client for the [TimeCamp API](https://github.com/timecamp/timecamp-api).
 
 The **api** package currently supports fetching tasks and time entries from the api. 
