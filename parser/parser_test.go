@@ -4,6 +4,7 @@ import (
 	api "github.com/rupkoe/timecamp-api"
 	"reflect"
 	"testing"
+	"time"
 )
 
 // todo: use data from rupert's fixture file
@@ -56,7 +57,7 @@ func TestGetProjectList(t *testing.T) {
 	}
 }
 
-func Test_TraverseTree(t *testing.T) {
+func TestTraverseTree(t *testing.T) {
 	type args struct {
 		tasks         []api.Task
 		parent        api.Task
@@ -164,5 +165,158 @@ func Test_TraverseTree(t *testing.T) {
 					len(taskIds), len(tt.args.expectedIDs))
 			}
 		})
+	}
+}
+
+func TestSummarizeTaskTree(t *testing.T) {
+	type args struct {
+		tasks         []api.Task
+		parentTaskIdx int
+		entries       []api.TimeEntry
+		expected      TaskTotals
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "Billable and total time",
+			args: args{
+				[]api.Task{
+					{
+						Name:     "Task A",
+						TaskID:   "A",
+						ParentID: "0",
+						Level:    "1",
+					},
+				},
+				0, //"Task A"
+				[]api.TimeEntry{
+					{
+						ID:          1,
+						Duration:    "600",
+						TaskID:      "A",
+						Billable:    1,
+						Description: "",
+					}, {
+						ID:          2,
+						Duration:    "300",
+						TaskID:      "A",
+						Billable:    0,
+						Description: "",
+					},
+				},
+				TaskTotals{
+					"A": {
+						TotalTime:    900 * time.Second,
+						BillableTime: 600 * time.Second,
+					},
+				},
+			},
+		}, {
+			name: "Task tree totals",
+			args: args{
+				[]api.Task{
+					{
+						Name:     "Task A",
+						TaskID:   "A",
+						ParentID: "0",
+						Level:    "1",
+					}, {
+						Name:     "Task A-A",
+						TaskID:   "A-A",
+						ParentID: "A",
+						Level:    "2",
+					}, {
+						Name:     "Task A-A-A",
+						TaskID:   "A-A-A",
+						ParentID: "A-A",
+						Level:    "3",
+					}, {
+						Name:     "Task A-A-A-A",
+						TaskID:   "A-A-A-A",
+						ParentID: "A-A-A",
+						Level:    "4",
+					}, {
+						Name:     "Task A-A-B",
+						TaskID:   "A-A-B",
+						ParentID: "A-A",
+						Level:    "3",
+					}, {
+						Name:     "Task A-B",
+						TaskID:   "A-B",
+						ParentID: "A",
+						Level:    "2",
+					},
+				},
+				1, // "Task A-A"
+				[]api.TimeEntry{
+					{
+						ID:          1,
+						Duration:    "600",
+						TaskID:      "A",
+						Billable:    1,
+						Description: "",
+					}, {
+						ID:          2,
+						Duration:    "600",
+						TaskID:      "A-A",
+						Billable:    1,
+						Description: "",
+					}, {
+						ID:          2,
+						Duration:    "600",
+						TaskID:      "A-A-A",
+						Billable:    1,
+						Description: "",
+					}, {
+						ID:          2,
+						Duration:    "600",
+						TaskID:      "A-A-A-A",
+						Billable:    1,
+						Description: "",
+					}, {
+						ID:          2,
+						Duration:    "600",
+						TaskID:      "A-A-B",
+						Billable:    1,
+						Description: "",
+					}, {
+						ID:          3,
+						Duration:    "600",
+						TaskID:      "A-B",
+						Billable:    1,
+						Description: "",
+					},
+				},
+				TaskTotals{
+					"A-A": {
+						TotalTime:    600 * time.Second,
+						BillableTime: 600 * time.Second,
+					},
+					"A-A-A": {
+						TotalTime:    600 * time.Second,
+						BillableTime: 600 * time.Second,
+					},
+					"A-A-A-A": {
+						TotalTime:    600 * time.Second,
+						BillableTime: 600 * time.Second,
+					},
+					"A-A-B": {
+						TotalTime:    600 * time.Second,
+						BillableTime: 600 * time.Second,
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			totals := SummarizeTaskTree(tt.args.tasks, tt.args.entries, tt.args.tasks[tt.args.parentTaskIdx])
+			if !reflect.DeepEqual(tt.args.expected, totals) {
+				t.Errorf("calculated and expected totals do not match")
+			}
+		})
+
 	}
 }
