@@ -73,15 +73,16 @@ func GetEntriesForTask(entries []api.TimeEntry, taskId string) []api.TimeEntry {
 	return result
 }
 
-// WalkTaskTree recursively walks down the task tree, starting at a given root task, calling a callback function for every node
-func WalkTaskTree(tasks []api.Task, root api.Task, callback func(api.Task, map[int]string)) {
-	traverseTree(tasks, root, callback)
+// WalkTaskTree recursively walks down the task tree, starting at a given root task, calling a callback function for every node.
+// includeRoot controls if callback is also executed with root task.
+func WalkTaskTree(tasks []api.Task, root api.Task, includeRoot bool, callback func(api.Task, map[int]string)) {
+	traverseTree(tasks, root, includeRoot, callback)
 }
 
 // SummarizeTaskTree recursively walks down the task tree, starting at a given root task, summarizing all recorded times
 func SummarizeTaskTree(tasks []api.Task, entries []api.TimeEntry, root api.Task) TaskTotals {
 	var taskTotals = make(TaskTotals)
-	traverseTree(tasks, root, func(task api.Task, parentIds map[int]string) {
+	traverseTree(tasks, root, true, func(task api.Task, parentIds map[int]string) {
 		timeEntries := GetEntriesForTask(entries, task.TaskID)
 		var taskTimes Totals
 		for _, timeEntry := range timeEntries {
@@ -102,12 +103,15 @@ func SummarizeTaskTree(tasks []api.Task, entries []api.TimeEntry, root api.Task)
 var parentIds = make(map[int]string)
 
 // traverseTree recursively walks down the task tree, starting at a given root task, calling a callback function for every node
-func traverseTree(tasks []api.Task, parent api.Task, callback func(api.Task, map[int]string)) {
+func traverseTree(tasks []api.Task, parent api.Task, includeParent bool, callback func(api.Task, map[int]string)) {
+	if includeParent && len(parentIds) == 0 {
+		callback(parent, parentIds)
+	}
 	for _, task := range tasks {
 		if task.ParentID == parent.TaskID {
 			parentIds[task.LevelParsed()-1] = task.ParentID
 			callback(task, parentIds)
-			traverseTree(tasks, task, callback)
+			traverseTree(tasks, task, includeParent, callback)
 			delete(parentIds, task.LevelParsed()-1)
 		}
 	}
