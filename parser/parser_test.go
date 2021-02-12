@@ -291,12 +291,12 @@ func TestSummarizeTaskTree(t *testing.T) {
 				},
 				TaskTotals{
 					"A-A": {
-						TotalTime:    600 * time.Second,
-						BillableTime: 600 * time.Second,
+						TotalTime:    2400 * time.Second,
+						BillableTime: 2400 * time.Second,
 					},
 					"A-A-A": {
-						TotalTime:    600 * time.Second,
-						BillableTime: 600 * time.Second,
+						TotalTime:    1200 * time.Second,
+						BillableTime: 1200 * time.Second,
 					},
 					"A-A-A-A": {
 						TotalTime:    600 * time.Second,
