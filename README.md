@@ -64,11 +64,11 @@ If you retrieved all tasks, you may get the projects (=top-level tasks) by using
 Walk the task tree starting at a given (root) node, providing a callback function that is called for every task being visited.
 
 ```go
-parser.WalkTaskTree(tasks, project, printit)
+parser.WalkTaskTree(tasks, project, true, printit)
 
 func printit(task api.Task, parentIds map[int]string) {
     for i := 1; i < task.LevelParsed(); i++ {
-        fmt.Print("--")
+        fmt.Print("-")
     }
     fmt.Println(task.Level, task.TaskID, task.Name, parentIds)
 }
