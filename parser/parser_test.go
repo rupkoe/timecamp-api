@@ -320,3 +320,62 @@ func TestSummarizeTaskTree(t *testing.T) {
 
 	}
 }
+
+func TestSummarizeTask(t *testing.T) {
+	type args struct {
+		task    api.Task
+		entries []api.TimeEntry
+	}
+	tests := []struct {
+		name         string
+		args         args
+		wantBillable time.Duration
+		wantTotal    time.Duration
+		wantErr      bool
+	}{
+		{
+			name: "Basic test",
+			args: args{
+				task: api.Task{
+					Name:     "Task A",
+					TaskID:   "A",
+					ParentID: "0",
+					Level:    "1",
+				},
+				entries: []api.TimeEntry{
+					{
+						ID:          1,
+						Duration:    "1800",
+						TaskID:      "A",
+						Billable:    1,
+						Description: "",
+					}, {
+						ID:          2,
+						Duration:    "3600",
+						TaskID:      "A",
+						Billable:    0,
+						Description: "",
+					},
+				},
+			},
+			wantBillable: 30 * time.Minute,
+			wantTotal:    90 * time.Minute,
+			wantErr:      false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotBillable, gotTotal, err := SummarizeTask(tt.args.task, tt.args.entries)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("SummarizeTask() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotBillable != tt.wantBillable {
+				t.Errorf("SummarizeTask() gotBillable = %v, want %v", gotBillable, tt.wantBillable)
+			}
+			if gotTotal != tt.wantTotal {
+				t.Errorf("SummarizeTask() gotTotal = %v, want %v", gotTotal, tt.wantTotal)
+			}
+		})
+	}
+}

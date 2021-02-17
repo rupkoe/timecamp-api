@@ -73,6 +73,22 @@ func GetEntriesForTask(entries []api.TimeEntry, taskId string) []api.TimeEntry {
 	return result
 }
 
+// SummarizeTask summarizes the entries directly related to given task.
+func SummarizeTask(task api.Task, entries []api.TimeEntry) (billable time.Duration, total time.Duration, err error) {
+	taskEntries := GetEntriesForTask(entries, task.TaskID)
+	for _, entry := range taskEntries {
+		duration, err := entry.DurationParsed()
+		if err != nil {
+			return 0, 0, err
+		}
+		if entry.IsBillable() {
+			billable += duration
+		}
+		total += duration
+	}
+	return
+}
+
 // WalkTaskTree recursively walks down the task tree, starting at a given root task, calling a callback function for every node.
 // includeRoot controls if callback is also executed with root task.
 func WalkTaskTree(tasks []api.Task, root api.Task, includeRoot bool, callback func(api.Task, map[int]string)) {
