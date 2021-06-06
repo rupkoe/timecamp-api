@@ -1,9 +1,10 @@
 package parser
 
 import (
-	"errors"
-	"github.com/rupkoe/timecamp-api"
+	"fmt"
 	"time"
+
+	"github.com/rupkoe/timecamp-api"
 )
 
 // Totals handles totals for spent times
@@ -19,10 +20,10 @@ func (t Totals) add(total Totals) Totals {
 }
 
 // TaskTotals keeps totals for spent times for tasks
-type TaskTotals map[string]Totals
+type TaskTotals map[int]Totals
 
 // add adds totals to a task total. Create map item if needed.
-func (t TaskTotals) add(taskId string, totals Totals) {
+func (t TaskTotals) add(taskId int, totals Totals) {
 	currentTotals, ok := t[taskId]
 	if !ok {
 		t[taskId] = totals
@@ -32,7 +33,7 @@ func (t TaskTotals) add(taskId string, totals Totals) {
 }
 
 // Get returns the totals for task
-func (t TaskTotals) Get(taskId string) Totals {
+func (t TaskTotals) Get(taskId int) Totals {
 	totals, ok := t[taskId]
 	if ok {
 		return totals
@@ -53,17 +54,17 @@ func GetProjectList(tasks []api.Task) []api.Task {
 }
 
 // GetTaskById returns a task identified by its ID.
-func GetTaskById(tasks []api.Task, id string) (*api.Task, error) {
+func GetTaskById(tasks []api.Task, id int) (*api.Task, error) {
 	for _, task := range tasks {
 		if task.TaskID == id {
 			return &task, nil
 		}
 	}
-	return nil, errors.New("task with ID " + id + " not found")
+	return nil, fmt.Errorf("task with ID %d not found", id)
 }
 
 // GetEntriesForTask returns an array with time entries for the given task.
-func GetEntriesForTask(entries []api.TimeEntry, taskId string) []api.TimeEntry {
+func GetEntriesForTask(entries []api.TimeEntry, taskId int) []api.TimeEntry {
 	var result []api.TimeEntry
 	for _, entry := range entries {
 		if entry.TaskID == taskId {
@@ -91,14 +92,14 @@ func SummarizeTask(task api.Task, entries []api.TimeEntry) (billable time.Durati
 
 // WalkTaskTree recursively walks down the task tree, starting at a given root task, calling a callback function for every node.
 // includeRoot controls if callback is also executed with root task.
-func WalkTaskTree(tasks []api.Task, root api.Task, includeRoot bool, callback func(api.Task, map[int]string)) {
+func WalkTaskTree(tasks []api.Task, root api.Task, includeRoot bool, callback func(api.Task, map[int]int)) {
 	traverseTree(tasks, root, includeRoot, callback)
 }
 
 // SummarizeTaskTree recursively walks down the task tree, starting at a given root task, summarizing all recorded times
 func SummarizeTaskTree(tasks []api.Task, entries []api.TimeEntry, root api.Task) TaskTotals {
 	var taskTotals = make(TaskTotals)
-	traverseTree(tasks, root, true, func(task api.Task, parentIds map[int]string) {
+	traverseTree(tasks, root, true, func(task api.Task, parentIds map[int]int) {
 		timeEntries := GetEntriesForTask(entries, task.TaskID)
 		var taskTimes Totals
 		for _, timeEntry := range timeEntries {
@@ -116,10 +117,10 @@ func SummarizeTaskTree(tasks []api.Task, entries []api.TimeEntry, root api.Task)
 	return taskTotals
 }
 
-var parentIds = make(map[int]string)
+var parentIds = make(map[int]int)
 
 // traverseTree recursively walks down the task tree, starting at a given root task, calling a callback function for every node
-func traverseTree(tasks []api.Task, parent api.Task, includeParent bool, callback func(api.Task, map[int]string)) {
+func traverseTree(tasks []api.Task, parent api.Task, includeParent bool, callback func(api.Task, map[int]int)) {
 	if includeParent && len(parentIds) == 0 {
 		callback(parent, parentIds)
 	}

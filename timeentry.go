@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -18,7 +19,7 @@ type TimeEntry struct {
 	Duration         string `json:"duration"`
 	UserID           string `json:"user_id"`
 	UserName         string `json:"user_name"`
-	TaskID           string `json:"task_id"`
+	TaskID           int    `json:"task_id"`
 	LastModify       string `json:"last_modify"`
 	Date             string `json:"date"`
 	StartTime        string `json:"start_time"`
@@ -93,7 +94,7 @@ func timeEntryUrl(connection Connection, params TimeEntryParams) (string, error)
 
 	var taskIds []string
 	for _, task := range params.Tasks {
-		taskIds = append(taskIds, task.TaskID)
+		taskIds = append(taskIds, strconv.FormatInt(int64(task.TaskID), 10))
 	}
 
 	queryUrl, err := url.Parse(connection.ApiUrl + "/entries/format/json/api_token/" + connection.Token + "/from/" +

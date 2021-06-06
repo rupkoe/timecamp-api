@@ -13,8 +13,8 @@ import (
 // API Docs: https://github.com/timecamp/timecamp-api/blob/master/sections/tasks.md
 // Created with https://mholt.github.io/json-to-go/
 type Task struct {
-	TaskID           string      `json:"task_id"`
-	ParentID         string      `json:"parent_id"`
+	TaskID           int         `json:"task_id"`
+	ParentID         int         `json:"parent_id"`
 	AssignedBy       string      `json:"assigned_by"`
 	Name             string      `json:"name"`
 	ExternalTaskID   string      `json:"external_task_id"`
@@ -38,7 +38,7 @@ type Task struct {
 // IsProject is true if task is a project (=top-level task) in TimeCamp
 func (t Task) IsProject() bool {
 	// Alternatively `t.Level == "1"` could be used to identify project tasks
-	return t.ParentID == "0"
+	return t.ParentID == 0
 }
 
 // LevelParsed converts the api's string value into a numeric value.
