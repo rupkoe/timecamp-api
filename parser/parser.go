@@ -67,7 +67,7 @@ func GetTaskById(tasks []api.Task, id int) (*api.Task, error) {
 func GetEntriesForTask(entries []api.TimeEntry, taskId int) []api.TimeEntry {
 	var result []api.TimeEntry
 	for _, entry := range entries {
-		if entry.TaskID == taskId {
+		if entry.TaskIdInt() == taskId {
 			result = append(result, entry)
 		}
 	}
@@ -126,10 +126,10 @@ func traverseTree(tasks []api.Task, parent api.Task, includeParent bool, callbac
 	}
 	for _, task := range tasks {
 		if task.ParentID == parent.TaskID {
-			parentIds[task.LevelParsed()-1] = task.ParentID
+			parentIds[task.Level-1] = task.ParentID
 			callback(task, parentIds)
 			traverseTree(tasks, task, includeParent, callback)
-			delete(parentIds, task.LevelParsed()-1)
+			delete(parentIds, task.Level-1)
 		}
 	}
 }

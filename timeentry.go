@@ -19,7 +19,7 @@ type TimeEntry struct {
 	Duration         string `json:"duration"`
 	UserID           string `json:"user_id"`
 	UserName         string `json:"user_name"`
-	TaskID           int    `json:"task_id"`
+	TaskID           string `json:"task_id"`
 	LastModify       string `json:"last_modify"`
 	Date             string `json:"date"`
 	StartTime        string `json:"start_time"`
@@ -31,6 +31,11 @@ type TimeEntry struct {
 	InvoiceID        string `json:"invoiceId"`
 	Color            string `json:"color"`
 	Description      string `json:"description"`
+}
+
+func (t TimeEntry) TaskIdInt() int {
+	id, _ := strconv.Atoi(t.TaskID)
+	return id
 }
 
 func (e TimeEntry) DurationParsed() (time.Duration, error) {
