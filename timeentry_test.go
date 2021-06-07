@@ -57,12 +57,12 @@ func Test_timeEntryUrl(t *testing.T) {
 					From: time.Time{},
 					To:   time.Time{}.Add(time.Hour),
 					Tasks: []Task{
-						{TaskID: "t1"},
-						{TaskID: "t2"},
+						{TaskID: 1},
+						{TaskID: 2},
 					},
 				},
 			},
-			want:    "URL/entries/format/json/api_token/TOKEN/from/0001-01-01/to/0001-01-01/task_ids/t1,t2",
+			want:    "URL/entries/format/json/api_token/TOKEN/from/0001-01-01/to/0001-01-01/task_ids/1,2",
 			wantErr: false,
 		},
 	}

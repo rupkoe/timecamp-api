@@ -3,9 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/url"
-	"strconv"
 )
 
 // Task maps the JSON returned by TimeCamp API /tasks.
@@ -13,19 +11,19 @@ import (
 // API Docs: https://github.com/timecamp/timecamp-api/blob/master/sections/tasks.md
 // Created with https://mholt.github.io/json-to-go/
 type Task struct {
-	TaskID           string      `json:"task_id"`
-	ParentID         string      `json:"parent_id"`
-	AssignedBy       string      `json:"assigned_by"`
+	TaskID           int         `json:"task_id"`
+	ParentID         int         `json:"parent_id"`
+	AssignedBy       int         `json:"assigned_by"`
 	Name             string      `json:"name"`
 	ExternalTaskID   string      `json:"external_task_id"`
 	ExternalParentID string      `json:"external_parent_id"`
-	Level            string      `json:"level"`
-	Archived         string      `json:"archived"`
+	Level            int         `json:"level"`
+	Archived         int         `json:"archived"`
 	Tags             string      `json:"tags"`
-	Budgeted         string      `json:"budgeted"`
+	Budgeted         int         `json:"budgeted"`
 	BudgetUnit       string      `json:"budget_unit"`
-	RootGroupID      string      `json:"root_group_id"`
-	Billable         string      `json:"billable"`
+	RootGroupID      int         `json:"root_group_id"`
+	Billable         int         `json:"billable"`
 	Note             string      `json:"note"`
 	PublicHash       string      `json:"public_hash"`
 	AddDate          string      `json:"add_date"`
@@ -38,16 +36,7 @@ type Task struct {
 // IsProject is true if task is a project (=top-level task) in TimeCamp
 func (t Task) IsProject() bool {
 	// Alternatively `t.Level == "1"` could be used to identify project tasks
-	return t.ParentID == "0"
-}
-
-// LevelParsed converts the api's string value into a numeric value.
-func (t Task) LevelParsed() int {
-	level, err := strconv.Atoi(t.Level)
-	if err != nil {
-		log.Fatal("malformed task - error converting level to int")
-	}
-	return level
+	return t.ParentID == 0
 }
 
 type TaskParams struct {

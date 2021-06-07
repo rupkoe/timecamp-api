@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -30,6 +31,11 @@ type TimeEntry struct {
 	InvoiceID        string `json:"invoiceId"`
 	Color            string `json:"color"`
 	Description      string `json:"description"`
+}
+
+func (t TimeEntry) TaskIdInt() int {
+	id, _ := strconv.Atoi(t.TaskID)
+	return id
 }
 
 func (e TimeEntry) DurationParsed() (time.Duration, error) {
@@ -93,7 +99,7 @@ func timeEntryUrl(connection Connection, params TimeEntryParams) (string, error)
 
 	var taskIds []string
 	for _, task := range params.Tasks {
-		taskIds = append(taskIds, task.TaskID)
+		taskIds = append(taskIds, strconv.FormatInt(int64(task.TaskID), 10))
 	}
 
 	queryUrl, err := url.Parse(connection.ApiUrl + "/entries/format/json/api_token/" + connection.Token + "/from/" +

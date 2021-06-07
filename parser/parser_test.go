@@ -1,10 +1,11 @@
 package parser
 
 import (
-	api "github.com/rupkoe/timecamp-api"
 	"reflect"
 	"testing"
 	"time"
+
+	api "github.com/rupkoe/timecamp-api"
 )
 
 // todo: use data from rupert's fixture file
@@ -24,26 +25,26 @@ func TestGetProjectList(t *testing.T) {
 				[]api.Task{
 					{
 						Name:     "Task A",
-						ParentID: "0",
+						ParentID: 0,
 					},
 					{
 						Name:     "Task A-B",
-						ParentID: "A",
+						ParentID: 1,
 					},
 					{
 						Name:     "Task C",
-						ParentID: "0",
+						ParentID: 0,
 					},
 				},
 			},
 			want: []api.Task{
 				{
 					Name:     "Task A",
-					ParentID: "0",
+					ParentID: 0,
 				},
 				{
 					Name:     "Task C",
-					ParentID: "0",
+					ParentID: 0,
 				},
 			},
 		},
@@ -62,7 +63,7 @@ func TestTraverseTree(t *testing.T) {
 		tasks         []api.Task
 		parent        api.Task
 		includeParent bool
-		expectedIDs   []string
+		expectedIDs   []int
 	}
 	tests := []struct {
 		name string
@@ -73,37 +74,37 @@ func TestTraverseTree(t *testing.T) {
 			args: args{
 				[]api.Task{
 					{
-						Name:     "Task A",
-						TaskID:   "A",
-						ParentID: "0",
-						Level:    "1",
+						Name:     "Task 1",
+						TaskID:   1,
+						ParentID: 0,
+						Level:    1,
 					},
 					{
-						Name:     "Task A-B",
-						TaskID:   "A-B",
-						ParentID: "A",
-						Level:    "2",
+						Name:     "Task 1-2",
+						TaskID:   12,
+						ParentID: 1,
+						Level:    2,
 					},
 					{
-						Name:     "Task A-B-C",
-						TaskID:   "A-B-C",
-						ParentID: "A-B",
-						Level:    "3",
+						Name:     "Task 1-2-3",
+						TaskID:   123,
+						ParentID: 12,
+						Level:    3,
 					},
 					{
 						Name:     "Task C",
-						TaskID:   "C",
-						ParentID: "0",
-						Level:    "1",
+						TaskID:   3,
+						ParentID: 0,
+						Level:    1,
 					}},
 				api.Task{
 					Name:     "Task A",
-					TaskID:   "A",
-					ParentID: "0",
-					Level:    "1",
+					TaskID:   1,
+					ParentID: 0,
+					Level:    1,
 				},
 				false,
-				[]string{"A-B", "A-B-C"},
+				[]int{12, 123},
 			},
 		}, {
 			name: "Without parent task",
@@ -111,53 +112,53 @@ func TestTraverseTree(t *testing.T) {
 				[]api.Task{
 					{
 						Name:     "Task A",
-						TaskID:   "A",
-						ParentID: "0",
-						Level:    "1",
+						TaskID:   1,
+						ParentID: 0,
+						Level:    1,
 					},
 					{
-						Name:     "Task A-B",
-						TaskID:   "A-B",
-						ParentID: "A",
-						Level:    "2",
+						Name:     "Task 1-2",
+						TaskID:   12,
+						ParentID: 1,
+						Level:    2,
 					},
 					{
-						Name:     "Task A-B-C",
-						TaskID:   "A-B-C",
-						ParentID: "A-B",
-						Level:    "3",
+						Name:     "Task 1-2-3",
+						TaskID:   123,
+						ParentID: 12,
+						Level:    3,
 					},
 					{
 						Name:     "Task C",
-						TaskID:   "C",
-						ParentID: "0",
-						Level:    "1",
+						TaskID:   3,
+						ParentID: 0,
+						Level:    1,
 					}},
 				api.Task{
 					Name:     "Task A",
-					TaskID:   "A",
-					ParentID: "0",
-					Level:    "1",
+					TaskID:   1,
+					ParentID: 0,
+					Level:    1,
 				},
 				true,
-				[]string{"A", "A-B", "A-B-C"},
+				[]int{1, 12, 123},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			taskIds := map[string]struct{}{}
-			traverseTree(tt.args.tasks, tt.args.parent, tt.args.includeParent, func(task api.Task, m map[int]string) {
+			taskIds := map[int]struct{}{}
+			traverseTree(tt.args.tasks, tt.args.parent, tt.args.includeParent, func(task api.Task, m map[int]int) {
 				_, exists := taskIds[task.TaskID]
 				if !exists {
 					taskIds[task.TaskID] = struct{}{}
 				} else {
-					t.Errorf("Each TaskID should only show up once, but found %s more often", task.TaskID)
+					t.Errorf("Each TaskID should only show up once, but found %d more often", task.TaskID)
 				}
 			})
 			for _, expected := range tt.args.expectedIDs {
 				if _, exists := taskIds[expected]; !exists {
-					t.Errorf("Expected task %s was not returned", expected)
+					t.Errorf("Expected task %d was not returned", expected)
 				}
 			}
 			if len(tt.args.expectedIDs) != len(taskIds) {
@@ -185,9 +186,9 @@ func TestSummarizeTaskTree(t *testing.T) {
 				[]api.Task{
 					{
 						Name:     "Task A",
-						TaskID:   "A",
-						ParentID: "0",
-						Level:    "1",
+						TaskID:   1,
+						ParentID: 0,
+						Level:    1,
 					},
 				},
 				0, //"Task A"
@@ -195,19 +196,19 @@ func TestSummarizeTaskTree(t *testing.T) {
 					{
 						ID:          1,
 						Duration:    "600",
-						TaskID:      "A",
+						TaskID:      "1",
 						Billable:    1,
 						Description: "",
 					}, {
 						ID:          2,
 						Duration:    "300",
-						TaskID:      "A",
+						TaskID:      "1",
 						Billable:    0,
 						Description: "",
 					},
 				},
 				TaskTotals{
-					"A": {
+					1: {
 						TotalTime:    900 * time.Second,
 						BillableTime: 600 * time.Second,
 					},
@@ -218,35 +219,35 @@ func TestSummarizeTaskTree(t *testing.T) {
 			args: args{
 				[]api.Task{
 					{
-						Name:     "Task A",
-						TaskID:   "A",
-						ParentID: "0",
-						Level:    "1",
+						Name:     "Task 1",
+						TaskID:   1,
+						ParentID: 0,
+						Level:    1,
 					}, {
-						Name:     "Task A-A",
-						TaskID:   "A-A",
-						ParentID: "A",
-						Level:    "2",
+						Name:     "Task 1-2",
+						TaskID:   11,
+						ParentID: 1,
+						Level:    2,
 					}, {
-						Name:     "Task A-A-A",
-						TaskID:   "A-A-A",
-						ParentID: "A-A",
-						Level:    "3",
+						Name:     "Task 1-1-1",
+						TaskID:   111,
+						ParentID: 11,
+						Level:    3,
 					}, {
-						Name:     "Task A-A-A-A",
-						TaskID:   "A-A-A-A",
-						ParentID: "A-A-A",
-						Level:    "4",
+						Name:     "Task 1-1-1-1",
+						TaskID:   1111,
+						ParentID: 111,
+						Level:    4,
 					}, {
-						Name:     "Task A-A-B",
-						TaskID:   "A-A-B",
-						ParentID: "A-A",
-						Level:    "3",
+						Name:     "Task 1-1-2",
+						TaskID:   112,
+						ParentID: 11,
+						Level:    3,
 					}, {
-						Name:     "Task A-B",
-						TaskID:   "A-B",
-						ParentID: "A",
-						Level:    "2",
+						Name:     "Task 1-2",
+						TaskID:   12,
+						ParentID: 1,
+						Level:    2,
 					},
 				},
 				1, // "Task A-A"
@@ -254,55 +255,55 @@ func TestSummarizeTaskTree(t *testing.T) {
 					{
 						ID:          1,
 						Duration:    "600",
-						TaskID:      "A",
+						TaskID:      "1",
 						Billable:    1,
 						Description: "",
 					}, {
 						ID:          2,
 						Duration:    "600",
-						TaskID:      "A-A",
+						TaskID:      "11",
 						Billable:    1,
 						Description: "",
 					}, {
 						ID:          2,
 						Duration:    "600",
-						TaskID:      "A-A-A",
+						TaskID:      "111",
 						Billable:    1,
 						Description: "",
 					}, {
 						ID:          2,
 						Duration:    "600",
-						TaskID:      "A-A-A-A",
+						TaskID:      "1111",
 						Billable:    1,
 						Description: "",
 					}, {
 						ID:          2,
 						Duration:    "600",
-						TaskID:      "A-A-B",
+						TaskID:      "112",
 						Billable:    1,
 						Description: "",
 					}, {
 						ID:          3,
 						Duration:    "600",
-						TaskID:      "A-B",
+						TaskID:      "12",
 						Billable:    1,
 						Description: "",
 					},
 				},
 				TaskTotals{
-					"A-A": {
+					11: {
 						TotalTime:    2400 * time.Second,
 						BillableTime: 2400 * time.Second,
 					},
-					"A-A-A": {
+					111: {
 						TotalTime:    1200 * time.Second,
 						BillableTime: 1200 * time.Second,
 					},
-					"A-A-A-A": {
+					1111: {
 						TotalTime:    600 * time.Second,
 						BillableTime: 600 * time.Second,
 					},
-					"A-A-B": {
+					112: {
 						TotalTime:    600 * time.Second,
 						BillableTime: 600 * time.Second,
 					},
@@ -338,21 +339,21 @@ func TestSummarizeTask(t *testing.T) {
 			args: args{
 				task: api.Task{
 					Name:     "Task A",
-					TaskID:   "A",
-					ParentID: "0",
-					Level:    "1",
+					TaskID:   1,
+					ParentID: 0,
+					Level:    1,
 				},
 				entries: []api.TimeEntry{
 					{
 						ID:          1,
 						Duration:    "1800",
-						TaskID:      "A",
+						TaskID:      "1",
 						Billable:    1,
 						Description: "",
 					}, {
 						ID:          2,
 						Duration:    "3600",
-						TaskID:      "A",
+						TaskID:      "1",
 						Billable:    0,
 						Description: "",
 					},
