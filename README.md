@@ -7,6 +7,12 @@ A partial client for the [TimeCamp API](https://github.com/timecamp/timecamp-api
 The **api** package currently supports fetching tasks and time entries from the api. 
 The optional **parser** package helps with processing the retrieved data.
 
+---
+
+⚠️ *As I do not use Timecamp API right now, the repo is not seeing any fixes or feature updates.*
+
+---
+
 ## API
 
 Provides raw data from the TimeCamp API. Supports currently only fetching tasks and time entries.
